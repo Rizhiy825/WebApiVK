@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using WebApiVK.Authorization;
+using WebApiVK.Domain;
 using WebApiVK.Models;
 
 namespace WebApiVK.Controllers
@@ -12,10 +13,12 @@ namespace WebApiVK.Controllers
     public class UsersController : Controller
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly IUsersRepository _repository;
 
-        public UsersController(ILogger<UsersController> logger)
+        public UsersController(ILogger<UsersController> logger, IUsersRepository repository)
         {
             _logger = logger;
+            _repository = repository;
         }
         
         [Authorize]
@@ -23,6 +26,7 @@ namespace WebApiVK.Controllers
         [HttpGet("{userId}", Name = nameof(GetUserById))]
         public ActionResult<User> GetUserById([FromRoute] Guid userId)
         {
+            var user = _repository.GetUserById(userId);
             return Ok();
         }
 

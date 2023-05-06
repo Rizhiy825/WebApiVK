@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 using WebApiVK.Authorization;
+using WebApiVK.Domain;
 using WebApiVK.Models;
 
 namespace WebApiVK;
@@ -15,6 +17,11 @@ public class StartUp
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddDbContext<UsersContext>(options =>
+            options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+        
+        services.AddScoped<IUsersRepository, NpgsqlUsersRepository>();
+
         services.AddScoped<IUserService, UserService>();
         // Внедрение реализации Basic-авторизации
         services.AddAuthentication("BasicAuthentication").
