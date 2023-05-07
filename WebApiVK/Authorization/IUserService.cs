@@ -4,5 +4,5 @@ namespace WebApiVK.Authorization;
 
 public interface IUserService
 {
-    Task<UserForAuthDTO> Authenticate(string username, string password);
+    Task<UserToAuthDto> Authenticate(string username, string password);
 }

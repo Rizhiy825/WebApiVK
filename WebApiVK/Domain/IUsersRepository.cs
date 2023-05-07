@@ -1,8 +1,6 @@
-﻿using WebApiVK.Models;
-
-namespace WebApiVK.Domain;
+﻿namespace WebApiVK.Domain;
 
 public interface IUsersRepository
 {
-    public User GetUserById(Guid id);
+    public UserEntity GetUserById(Guid id);
 }

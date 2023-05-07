@@ -1,6 +1,4 @@
-﻿using WebApiVK.Models;
-
-namespace WebApiVK.Domain;
+﻿namespace WebApiVK.Domain;
 
 public class NpgsqlUsersRepository : IUsersRepository
 {
@@ -11,7 +9,7 @@ public class NpgsqlUsersRepository : IUsersRepository
         _context = context;
     }
 
-    public User GetUserById(Guid id)
+    public UserEntity GetUserById(Guid id)
     {
         var user = _context.Users.Find(id);
         return user;

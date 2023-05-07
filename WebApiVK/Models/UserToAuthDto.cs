@@ -1,6 +1,6 @@
 ﻿namespace WebApiVK.Models;
 
-public class UserForAuthDTO
+public class UserToAuthDto
 {
     public Guid Id { get; set; }
     public string Login { get; set; }

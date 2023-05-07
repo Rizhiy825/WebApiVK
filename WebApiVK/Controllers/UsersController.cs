@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using WebApiVK.Authorization;
 using WebApiVK.Domain;
-using WebApiVK.Models;
 
 namespace WebApiVK.Controllers
 {
@@ -24,7 +23,7 @@ namespace WebApiVK.Controllers
         [Authorize]
         [HttpHead("{userId}")]
         [HttpGet("{userId}", Name = nameof(GetUserById))]
-        public ActionResult<User> GetUserById([FromRoute] Guid userId)
+        public ActionResult<UserEntity> GetUserById([FromRoute] Guid userId)
         {
             var user = _repository.GetUserById(userId);
             return Ok();
@@ -32,7 +31,7 @@ namespace WebApiVK.Controllers
 
         [HttpGet]
         [Produces("application/json")]
-        public ActionResult<User> GetUsers([FromQuery] int pageNumber, [FromQuery] int pageSize = 10)
+        public ActionResult<UserEntity> GetUsers([FromQuery] int pageNumber, [FromQuery] int pageSize = 10)
         {
             pageNumber = pageNumber == 0 ? 1 : pageNumber;
             pageSize = pageSize == 0 ? 1 : pageSize;

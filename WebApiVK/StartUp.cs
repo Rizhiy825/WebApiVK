@@ -22,6 +22,7 @@ public class StartUp
         
         services.AddScoped<IUsersRepository, NpgsqlUsersRepository>();
 
+        services.AddScoped<IEncryptor, PasswordEncryptor>();
         services.AddScoped<IUserService, UserService>();
         // Внедрение реализации Basic-авторизации
         services.AddAuthentication("BasicAuthentication").
@@ -41,7 +42,7 @@ public class StartUp
 
         services.AddAutoMapper(cfg =>
         {
-            cfg.CreateMap<UserForAuthDTO, User>();
+            cfg.CreateMap<UserToAuthDto, UserEntity>();
         }, new System.Reflection.Assembly[0]);
     }
 

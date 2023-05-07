@@ -25,7 +25,7 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        UserForAuthDTO user;
+        UserToAuthDto user;
 
         try
         {
