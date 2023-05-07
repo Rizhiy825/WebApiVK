@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using WebApiVK.Interfaces;
 using WebApiVK.Models;
 
 namespace WebApiVK.Authorization;

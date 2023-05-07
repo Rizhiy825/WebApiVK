@@ -1,9 +1,39 @@
 using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
+using FluentAssertions;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
 
 namespace Tests
 {
     public class CreateUser : UsersApiTestsBase
     {
+        [Fact]
+        public void TODO_WhenNotAuthorizedUser()
+        {
+            var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Post;
+            request.RequestUri = BuildUsersUri();
+            request.Headers.Add("Accept", "application/json");
+
+            var userLogin = "primer2";
+            var userPassword = "qwerty";
+
+            var convertedLogin = ConvertToBase64(userLogin);
+            var convertedPassword = ConvertToBase64(userPassword);
+            
+            request.Content = new
+            {
+                login = convertedLogin,
+                password = convertedPassword
+            }.SerializeToJsonContent();
+
+            var response = httpClient.Send(request);
+
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+        }
+
         [Fact]
         public void Code201_WhenAllIsFine()
         {
@@ -15,13 +45,22 @@ namespace Tests
             var userLogin = "primer";
             var userPassword = "qwerty";
 
-            var authLine = $"{userLogin}:{userPassword}";
-            var base64Line = Convert.ToBase64String(
-                System.Text.Encoding.ASCII.GetBytes(authLine));
+            var convertedLogin = ConvertToBase64(userLogin);
+            var convertedPassword = ConvertToBase64(userPassword);
 
+            var base64Line = ConvertToBase64AuthLine(userLogin, userPassword);
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Basic", base64Line);
 
+            request.Content = new
+            {
+                login = convertedLogin,
+                password = convertedPassword
+            }.SerializeToJsonContent();
+
+            var response = httpClient.Send(request);
+
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
         }
     }
 }

@@ -34,5 +34,20 @@ public abstract class UsersApiTestsBase
         return uriBuilder.Uri;
     }
 
+    protected string ConvertToBase64AuthLine(string userLogin, string userPassword)
+    {
+        var authLine = $"{userLogin}:{userPassword}";
+        var base64Line = Convert.ToBase64String(
+            System.Text.Encoding.ASCII.GetBytes(authLine));
 
+        return base64Line;
+    }
+
+    protected string ConvertToBase64(string lineToConvert)
+    {
+        var base64Line = Convert.ToBase64String(
+            System.Text.Encoding.ASCII.GetBytes(lineToConvert));
+
+        return base64Line;
+    }
 }

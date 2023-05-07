@@ -1,4 +1,4 @@
-﻿namespace WebApiVK.Authorization;
+﻿namespace WebApiVK.Interfaces;
 
 public interface IEncryptor
 {

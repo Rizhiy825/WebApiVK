@@ -1,13 +1,15 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using WebApiVK.Interfaces;
+using WebApiVK.Models;
 
 namespace WebApiVK.Authorization;
 
-public class PasswordEncryptor : IEncryptor
+public class EncryptorSha256 : IEncryptor
 {
     private const string salt = "randomSalt";
 
-    // Получаем хэш пароля, подмешивая соль
+    // Получаем хэш пароля, подмешивая соль.
     public string EncryptPassword(string password)
     {
         byte[] saltBytes = Encoding.UTF8.GetBytes(salt);

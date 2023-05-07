@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using WebApiVK.Authorization;
 using WebApiVK.Domain;
+using WebApiVK.Interfaces;
 using WebApiVK.Models;
 
 namespace WebApiVK;
@@ -22,7 +24,8 @@ public class StartUp
         
         services.AddScoped<IUsersRepository, NpgsqlUsersRepository>();
 
-        services.AddScoped<IEncryptor, PasswordEncryptor>();
+        services.AddScoped<IEncryptor, EncryptorSha256>();
+        services.AddScoped<ICoder, Base64Coder>();
         services.AddScoped<IUserService, UserService>();
         // Внедрение реализации Basic-авторизации
         services.AddAuthentication("BasicAuthentication").
@@ -35,7 +38,7 @@ public class StartUp
         {
             // Отвечаем 406 Not Acceptable на запросы неизвестных форматов
             options.ReturnHttpNotAcceptable = true;
-        });
+        }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserToCreateDtoValidator>());
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
@@ -43,6 +46,7 @@ public class StartUp
         services.AddAutoMapper(cfg =>
         {
             cfg.CreateMap<UserToAuthDto, UserEntity>();
+            cfg.CreateMap<UserToCreateDto, UserEntity>();
         }, new System.Reflection.Assembly[0]);
     }
 

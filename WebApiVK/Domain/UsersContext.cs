@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using WebApiVK.Authorization;
+using WebApiVK.Interfaces;
 
 namespace WebApiVK.Domain;
 
@@ -10,13 +10,13 @@ public class UsersContext : DbContext
     public DbSet<UserGroup> UserGroups { get; set; } = null!;
     public DbSet<UserState> UserStates { get; set; } = null!;
 
-    private IEncryptor _encryptor;
+    private IEncryptor encryptor;
 
     public UsersContext(DbContextOptions<UsersContext> options, IEncryptor encryptor)
         : base(options)
     {
-        _encryptor = encryptor;
-        Database.EnsureDeleted();
+        this.encryptor = encryptor;
+        //Database.EnsureDeleted();
         Database.EnsureCreated(); // гарантируем, что БД создана
 
         if (!UserGroups.Any())
@@ -37,7 +37,7 @@ public class UsersContext : DbContext
 
         if (!Users.Any())
         {
-            var encryptedPassword = _encryptor.EncryptPassword("admin");
+            var encryptedPassword = this.encryptor.EncryptPassword("admin");
             var adminGroup = UserGroups.Where(x => x.Code == GroupType.Admin).First();
             var adminState = UserStates.Where(x => x.Code == StateType.Active).First();
             var admin = new UserEntity("admin", encryptedPassword, adminGroup, adminState);
@@ -50,18 +50,5 @@ public class UsersContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserEntity>().HasAlternateKey(u => u.Login);
-        
-        //TODO привязать дату к часовому поясу Москвы
-        modelBuilder.Entity<UserEntity>()
-            .Property(x => x.Created)
-            .HasDefaultValue(DateTime.UtcNow);
-
-        //modelBuilder.Entity<UserEntity>()
-        //    .Property(x => x.Group)
-        //    .HasDefaultValue(GroupTypes.User);
-
-        //modelBuilder.Entity<UserEntity>()
-        //    .Property(x => x.State)
-        //    .HasDefaultValue(StateTypes.Active);
     }
 }

@@ -11,10 +11,10 @@ public class UserEntity
     public string Password { get; set; }
     public DateTime Created { get; set; }
 
-    public int UserGroupId { get; set; }
+    //public int UserGroupId { get; set; }
     public UserGroup Group { get; set; }
 
-    public int UserStateId { get; set; }
+    //public int UserStateId { get; set; }
     public UserState State { get; set; }
 
     public UserEntity()

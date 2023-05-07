@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using WebApiVK.Authorization;
 using WebApiVK.Domain;
+using WebApiVK.Interfaces;
+using WebApiVK.Models;
 
 namespace WebApiVK.Controllers
 {
@@ -11,13 +13,24 @@ namespace WebApiVK.Controllers
     [ApiController]
     public class UsersController : Controller
     {
-        private readonly ILogger<UsersController> _logger;
-        private readonly IUsersRepository _repository;
+        private readonly ILogger<UsersController> logger;
+        private readonly IUsersRepository repository;
+        private readonly IMapper mapper;
+        private readonly IEncryptor encryptor;
+        private readonly ICoder coder;
 
-        public UsersController(ILogger<UsersController> logger, IUsersRepository repository)
+
+        public UsersController(ILogger<UsersController> logger, 
+            IUsersRepository repository, 
+            IMapper mapper,
+            IEncryptor encryptor,
+            ICoder coder)
         {
-            _logger = logger;
-            _repository = repository;
+            this.logger = logger;
+            this.repository = repository;
+            this.mapper = mapper;
+            this.encryptor = encryptor;
+            this.coder = coder;
         }
         
         [Authorize]
@@ -25,7 +38,7 @@ namespace WebApiVK.Controllers
         [HttpGet("{userId}", Name = nameof(GetUserById))]
         public ActionResult<UserEntity> GetUserById([FromRoute] Guid userId)
         {
-            var user = _repository.GetUserById(userId);
+            var user = repository.GetUserById(userId);
             return Ok();
         }
 
@@ -38,6 +51,24 @@ namespace WebApiVK.Controllers
             pageSize = pageSize > 20 ? 20 : pageSize;
             
             return Ok();
+        }
+
+        [HttpPost]
+        [Produces("application/json", "application/xml")]
+        public IActionResult CreateUser([FromBody] UserToCreateDto user)
+        {
+            // Валидация происходит с помощью FluentValidation
+            var login = coder.Decode(user.Login);
+            var password = coder.Decode(user.Password);
+
+            var encrypted = encryptor.EncryptPassword(password);
+            var newUser = new UserToCreateDto(login, encrypted);
+
+            var userEntity = mapper.Map<UserEntity>(newUser);
+            var addedUser = repository.Insert(userEntity);
+
+            var response = CreatedAtRoute(nameof(GetUserById), new { login = addedUser.Login }, addedUser.Login);
+            return response;
         }
     }
 }

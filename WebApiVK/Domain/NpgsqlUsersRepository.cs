@@ -1,17 +1,47 @@
-﻿namespace WebApiVK.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using WebApiVK.Interfaces;
+
+namespace WebApiVK.Domain;
 
 public class NpgsqlUsersRepository : IUsersRepository
 {
-    private readonly UsersContext _context;
+    private readonly UsersContext context;
 
     public NpgsqlUsersRepository(UsersContext context)
     {
-        _context = context;
+        this.context = context;
     }
 
     public UserEntity GetUserById(Guid id)
     {
-        var user = _context.Users.Find(id);
+        var user = context.Users.Find(id);
         return user;
+    }
+
+    public UserEntity GetUserByLogin(string login)
+    {
+        var user = context.Users.Where(x => x.Login == login).First();
+
+        return user;
+    }
+
+    public UserEntity Insert(UserEntity user)
+    {
+        if (user.Group == null)
+        {
+            user.Group = context.UserGroups.First(x => x.Code == GroupType.User);
+        }
+
+        if (user.State == null)
+        {
+            user.State = context.UserStates.First(x => x.Code == StateType.Active);
+        }
+
+        //TODO привязать дату к часовому поясу Москвы
+        user.Created = DateTime.UtcNow;
+
+        var added = context.Add(user).Entity;
+        context.SaveChanges();
+        return added;
     }
 }

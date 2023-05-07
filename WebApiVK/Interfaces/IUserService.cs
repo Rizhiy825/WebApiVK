@@ -1,6 +1,6 @@
 ﻿using WebApiVK.Models;
 
-namespace WebApiVK.Authorization;
+namespace WebApiVK.Interfaces;
 
 public interface IUserService
 {
