@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using WebApiVK.Attributes;
 using WebApiVK.Authorization;
 using WebApiVK.Domain;
 using WebApiVK.Interfaces;
@@ -33,17 +34,16 @@ namespace WebApiVK.Controllers
             this.coder = coder;
         }
         
-        [Authorize]
-        [HttpHead("{userId}")]
         [HttpGet("{userId}", Name = nameof(GetUserById))]
+        [Authorize(Roles = "admin")]
         public ActionResult<UserEntity> GetUserById([FromRoute] Guid userId)
         {
-            var user = repository.GetUserById(userId);
+            var user = repository.FindById(userId);
             return Ok();
         }
 
         [HttpGet]
-        [Produces("application/json")]
+        [Authorize(Roles = "admin")]
         public ActionResult<UserEntity> GetUsers([FromQuery] int pageNumber, [FromQuery] int pageSize = 10)
         {
             pageNumber = pageNumber == 0 ? 1 : pageNumber;
@@ -53,8 +53,9 @@ namespace WebApiVK.Controllers
             return Ok();
         }
 
+        // Допускаем к созданию либо админа, либо неаутентифицированного пользователя
         [HttpPost]
-        [Produces("application/json", "application/xml")]
+        [AllowAnonymousOrAdmin]
         public IActionResult CreateUser([FromBody] UserToCreateDto user)
         {
             // Валидация происходит с помощью FluentValidation

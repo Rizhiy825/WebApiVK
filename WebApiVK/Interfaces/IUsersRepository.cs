@@ -4,7 +4,7 @@ namespace WebApiVK.Interfaces;
 
 public interface IUsersRepository
 {
-    public UserEntity GetUserById(Guid id);
-    public UserEntity GetUserByLogin(string login);
+    public UserEntity FindById(Guid id);
+    public UserEntity FindByLogin(string login);
     public UserEntity Insert(UserEntity userEntity);
 }

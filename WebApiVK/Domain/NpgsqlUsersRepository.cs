@@ -12,16 +12,16 @@ public class NpgsqlUsersRepository : IUsersRepository
         this.context = context;
     }
 
-    public UserEntity GetUserById(Guid id)
+    public UserEntity FindById(Guid id)
     {
         var user = context.Users.Find(id);
         return user;
     }
 
-    public UserEntity GetUserByLogin(string login)
+    // Добавь валидацию на наличие группы и статуса
+    public UserEntity FindByLogin(string login)
     {
         var user = context.Users.Where(x => x.Login == login).First();
-
         return user;
     }
 

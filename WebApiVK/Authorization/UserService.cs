@@ -1,35 +1,41 @@
 ﻿using System.Text;
 using Microsoft.EntityFrameworkCore;
+using WebApiVK.Domain;
 using WebApiVK.Interfaces;
-using WebApiVK.Models;
 
 namespace WebApiVK.Authorization;
 
+// TODO разберись с методом Authenticate
 public class UserService : IUserService
 {
-    private IEncryptor _encryptor;
-    private readonly IUsersRepository _repository;
+    private IEncryptor encryptor;
+    private readonly IUsersRepository repository;
 
     public UserService(IEncryptor encryptor, IUsersRepository repository)
     {
-        _encryptor = encryptor;
-        _repository = repository;
+        this.encryptor = encryptor;
+        this.repository = repository;
     }
 
-    public Task<UserToAuthDto> Authenticate(string username, string password)
+    public async Task<UserToAuth> Authenticate(string username, string password)
     {
-        if (username == "admin")
-        {
-            var passwordHash = _encryptor.EncryptPassword(password);
+        var user = repository.FindByLogin(username);
 
-            if (passwordHash == "WTgmRoHu2yk6gt1YN44y86vREhV6JLQTFkCZYoLpSgM=")
+        if (user == null)
+        {
+            return await Task.FromResult<UserToAuth>(null);
+        }
+
+        if (user.Group.Code == GroupType.Admin)
+        {
+            var passwordHash = encryptor.EncryptPassword(password);
+
+            if (passwordHash == user.Password)
             {
-                return Task<UserToAuthDto>.Run(() => new UserToAuthDto(){Id = new Guid(), Login = "admin"});
+                return await Task.FromResult(new UserToAuth(user.Id, username, user.Group));
             }
         }
 
-        return null;
+        return await Task.FromResult(new UserToAuth());
     }
-
-    
 }

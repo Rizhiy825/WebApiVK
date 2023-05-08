@@ -45,7 +45,7 @@ public class StartUp
 
         services.AddAutoMapper(cfg =>
         {
-            cfg.CreateMap<UserToAuthDto, UserEntity>();
+            cfg.CreateMap<UserToAuth, UserEntity>();
             cfg.CreateMap<UserToCreateDto, UserEntity>();
         }, new System.Reflection.Assembly[0]);
     }

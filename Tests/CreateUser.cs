@@ -10,14 +10,14 @@ namespace Tests
     public class CreateUser : UsersApiTestsBase
     {
         [Fact]
-        public void TODO_WhenNotAuthorizedUser()
+        public void Code201_WhenNotAuthorizedUser()
         {
             var request = new HttpRequestMessage();
             request.Method = HttpMethod.Post;
             request.RequestUri = BuildUsersUri();
             request.Headers.Add("Accept", "application/json");
 
-            var userLogin = "primer2";
+            var userLogin = "primer3";
             var userPassword = "qwerty";
 
             var convertedLogin = ConvertToBase64(userLogin);
@@ -35,7 +35,36 @@ namespace Tests
         }
 
         [Fact]
-        public void Code201_WhenAllIsFine()
+        public void Code201_WhenAdminCreateNewUser()
+        {
+            var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Post;
+            request.RequestUri = BuildUsersUri();
+            request.Headers.Add("Accept", "application/json");
+
+            var userLogin = "primer5";
+            var userPassword = "qwerty";
+
+            var convertedLogin = ConvertToBase64(userLogin);
+            var convertedPassword = ConvertToBase64(userPassword);
+
+            var base64Line = ConvertToBase64AuthLine("admin", "admin");
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Basic", base64Line);
+
+            request.Content = new
+            {
+                login = convertedLogin,
+                password = convertedPassword
+            }.SerializeToJsonContent();
+
+            var response = httpClient.Send(request);
+
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+        }
+
+        [Fact]
+        public void Code403_WhenUserHasAlreadyAuthenticated()
         {
             var request = new HttpRequestMessage();
             request.Method = HttpMethod.Post;
@@ -60,7 +89,13 @@ namespace Tests
 
             var response = httpClient.Send(request);
 
-            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
+        public void Code_WhenAddSameLogin()
+        {
+           
         }
     }
 }
