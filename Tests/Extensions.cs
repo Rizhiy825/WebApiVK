@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Tests;
 
@@ -14,5 +15,11 @@ public static class Extensions
         var content = new ByteArrayContent(bytes);
         content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         return content;
+    }
+
+    public static JToken ReadContentAsJson(this HttpResponseMessage response)
+    {
+        var content = response.Content.ReadAsStringAsync().Result;
+        return JToken.Parse(content);
     }
 }

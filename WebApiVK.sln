@@ -5,7 +5,10 @@ VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiVK", "WebApiVK\WebApiVK.csproj", "{4392516B-C7E0-461B-9109-9585CD435C0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{24BD1BBA-F440-4102-B8F6-66792F9563C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{24BD1BBA-F440-4102-B8F6-66792F9563C9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4392516B-C7E0-461B-9109-9585CD435C0F} = {4392516B-C7E0-461B-9109-9585CD435C0F}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

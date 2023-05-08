@@ -1,26 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using WebApiVK.Interfaces;
 
 namespace WebApiVK.Domain;
 
-public class UsersContext : DbContext, IContext
+public class TestContext : DbContext
 {
+    private readonly IEncryptor encryptor;
     public DbSet<UserEntity> Users { get; set; } = null!;
     public DbSet<UserGroup> UserGroups { get; set; } = null!;
     public DbSet<UserState> UserStates { get; set; } = null!;
 
-    private IEncryptor encryptor;
-
-    public UsersContext(DbContextOptions<UsersContext> options, IEncryptor encryptor)
+    public TestContext(DbContextOptions<TestContext> options, IEncryptor encryptor)
         : base(options)
     {
         this.encryptor = encryptor;
-        //Database.EnsureDeleted();
         Database.EnsureCreated(); // гарантируем, что БД создана
-
-        // Удаляем всех пользователей 
-        Users.RemoveRange(Users.ToList()); 
 
         if (!UserGroups.Any())
         {
@@ -48,10 +42,5 @@ public class UsersContext : DbContext, IContext
 
             SaveChanges();
         }
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<UserEntity>().HasAlternateKey(u => u.Login);
     }
 }

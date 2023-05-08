@@ -21,7 +21,8 @@ public class NpgsqlUsersRepository : IUsersRepository
     // Добавь валидацию на наличие группы и статуса
     public UserEntity FindByLogin(string login)
     {
-        var user = context.Users.Where(x => x.Login == login).First();
+        var user = context.Users.Include(x => x.Group)
+            .Where(x => x.Login == login).First();
         return user;
     }
 

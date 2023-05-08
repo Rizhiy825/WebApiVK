@@ -36,6 +36,6 @@ public class UserService : IUserService
             }
         }
 
-        return await Task.FromResult(new UserToAuth());
+        return await Task.FromResult<UserToAuth>(null);
     }
 }

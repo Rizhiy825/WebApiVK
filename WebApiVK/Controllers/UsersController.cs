@@ -69,7 +69,7 @@ namespace WebApiVK.Controllers
             var addedUser = repository.Insert(userEntity);
 
             var response = CreatedAtRoute(nameof(GetUserById), new { login = addedUser.Login }, addedUser.Login);
-            return response;
+            return Ok();
         }
     }
 }

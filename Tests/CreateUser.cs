@@ -17,7 +17,7 @@ namespace Tests
             request.RequestUri = BuildUsersUri();
             request.Headers.Add("Accept", "application/json");
 
-            var userLogin = "primer3";
+            var userLogin = "commonUser";
             var userPassword = "qwerty";
 
             var convertedLogin = ConvertToBase64(userLogin);
@@ -61,6 +61,38 @@ namespace Tests
             var response = httpClient.Send(request);
 
             response.StatusCode.Should().Be(HttpStatusCode.Created);
+        }
+
+        [Fact]
+        public void Code401_WhenUserPasswordWrong()
+        {
+            var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Post;
+            request.RequestUri = BuildUsersUri();
+            request.Headers.Add("Accept", "application/json");
+
+            var userLogin = "primer5";
+            var userPassword = "qwerty";
+
+            var convertedLogin = ConvertToBase64(userLogin);
+            var convertedPassword = ConvertToBase64(userPassword);
+
+            var base64Line = ConvertToBase64AuthLine("admin", "wrong password");
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Basic", base64Line);
+
+            request.Content = new
+            {
+                login = convertedLogin,
+                password = convertedPassword
+            }.SerializeToJsonContent();
+
+            var response = httpClient.SendAsync(request);
+            var res = response.Result;
+
+            var body = res.ReadContentAsJson();
+            var str = body.ToString();
+
         }
 
         [Fact]

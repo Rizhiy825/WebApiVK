@@ -1,6 +1,8 @@
-﻿using FluentValidation.AspNetCore;
+﻿using System.Net;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using WebApiVK.Authorization;
 using WebApiVK.Domain;
 using WebApiVK.Interfaces;
@@ -19,19 +21,30 @@ public class StartUp
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddDbContext<UsersContext>(options =>
-            options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-        
-        services.AddScoped<IUsersRepository, NpgsqlUsersRepository>();
+        // Эти две строки подключают контекст БД postgre. Для работы с настоящей БД раскомментируй
+        //services.AddDbContext<UsersContext>(options =>
+        //    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+        // Это контекст БД для тестов. Это имитация БД, так что для работы с настоящей БД закомментируй
+        services.AddDbContext<TestContext>(options =>
+              options.UseInMemoryDatabase("Default Base"));
+
+        // TODO можно ли прокинуть зависимость DbContext вместо создания TestRepository?
+        // БД postgre. Для работы с настоящей БД раскомментируй
+        //services.AddScoped<IUsersRepository, NpgsqlUsersRepository>();
+
+        // БД для тестов. Для работы с настоящей БД закомментируй
+        services.AddScoped<IUsersRepository, TestRepository>();
 
         services.AddScoped<IEncryptor, EncryptorSha256>();
         services.AddScoped<ICoder, Base64Coder>();
         services.AddScoped<IUserService, UserService>();
+
         // Внедрение реализации Basic-авторизации
         services.AddAuthentication("BasicAuthentication").
             AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>
                 ("BasicAuthentication", null);
-        
+
         services.AddAuthorization();
 
         services.AddControllers(options =>
