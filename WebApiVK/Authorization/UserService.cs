@@ -1,11 +1,7 @@
-﻿using System.Text;
-using Microsoft.EntityFrameworkCore;
-using WebApiVK.Domain;
-using WebApiVK.Interfaces;
+﻿using WebApiVK.Interfaces;
 
 namespace WebApiVK.Authorization;
 
-// TODO разберись с методом Authenticate
 public class UserService : IUserService
 {
     private IEncryptor encryptor;
@@ -29,9 +25,7 @@ public class UserService : IUserService
         {
             return await Task.FromResult(new UserToAuth(user.Id, username, user.Group));
         }
-        else
-        {
-            return null;
-        }
+        
+        return null;
     }
 }

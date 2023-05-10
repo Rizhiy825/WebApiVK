@@ -35,10 +35,12 @@ public class UserToCreateDtoValidator : AbstractValidator<UserToCreateDto>
         return false;
     }
 
-    // Будем считать, что в логине и пароле не должно быть символов пробела 
+    // Будем считать, что в логине и пароле не должно быть символов пробела
     private bool ValidSymbolsInCredentials(string credential)
     {
-        if (credential.Contains(' '))
+        var decoded = coder.Decode(credential);
+
+        if (decoded.Contains(' '))
         {
             return false;
         }

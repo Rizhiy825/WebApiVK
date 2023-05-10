@@ -1,9 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
-
-namespace WebApiVK.Domain;
+﻿namespace WebApiVK.Models;
 
 public class UserEntity
 {
@@ -16,15 +11,8 @@ public class UserEntity
     public int UserStateId { get; set; }
     public UserState State { get; set; }
 
-    public UserEntity()
-    {
-        Id = Guid.NewGuid();
-    }
+    public UserEntity() { }
 
-    public UserEntity(Guid id)
-    {
-        Id = id;
-    }
     public UserEntity(string login, string password, UserGroup group, UserState state)
     {
         Login = login;
@@ -42,7 +30,7 @@ public class UserEntity
         if (group != null) UserGroupId = group.Id;
         Group = group;
 
-        if(state != null) UserStateId = state.Id;
+        if (state != null) UserStateId = state.Id;
         State = state;
 
         Password = password;

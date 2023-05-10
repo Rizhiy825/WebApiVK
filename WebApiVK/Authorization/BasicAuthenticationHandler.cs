@@ -2,18 +2,8 @@
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Encodings.Web;
 using WebApiVK.Interfaces;
-using WebApiVK.Authorization;
-using Newtonsoft.Json;
-using System.Net;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.Features;
-using WebApiVK.Domain;
 
 namespace WebApiVK.Authorization;
 
@@ -50,7 +40,6 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
         if (user == null)
         {
-            // Завершить выполнение запроса с ошибкой
             return AuthenticateResult.Fail("Invalid username or password");
         }
         

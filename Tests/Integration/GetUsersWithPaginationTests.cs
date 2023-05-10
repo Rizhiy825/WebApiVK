@@ -1,9 +1,7 @@
 ﻿using FluentAssertions;
 using Newtonsoft.Json;
-using System.Net;
-using System.Net.Http.Headers;
 
-namespace Tests.Old;
+namespace Tests.Integration;
 
 public class GetUsersWithPaginationTests : UsersApiTestsBase
 {
@@ -17,16 +15,8 @@ public class GetUsersWithPaginationTests : UsersApiTestsBase
         request.RequestUri = BuildUsersWithPagesUri(2, 10);
         request.Headers.Add("Accept", "*/*");
 
-        var userLogin = "admin";
-        var userPassword = "admin";
-
-        var authLine = $"{userLogin}:{userPassword}";
-        var base64Line = Convert.ToBase64String(
-            System.Text.Encoding.ASCII.GetBytes(authLine));
-
-        request.Headers.Authorization =
-            new AuthenticationHeaderValue("Basic", base64Line);
-
+        RegisterAuthHeader(request.Headers, "admin", "admin");
+        
         var response = httpClient.Send(request);
 
         response.ShouldHaveHeader("Content-Type", "application/json; charset=utf-8");
@@ -48,11 +38,7 @@ public class GetUsersWithPaginationTests : UsersApiTestsBase
 
         for (var i = 0; i < count; i++)
         {
-            tasks[i] = CreateUser(new
-            {
-                login = ConvertToBase64($"login_{i}"),
-                password = ConvertToBase64($"password_{i}")
-            });
+            tasks[i] = CreateUser($"login_{i}", $"password_{i}");
         }
 
         Task.WaitAll(tasks);

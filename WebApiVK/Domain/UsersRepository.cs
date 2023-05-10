@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebApiVK.Interfaces;
+using WebApiVK.Models;
 
 namespace WebApiVK.Domain;
 
@@ -14,18 +15,6 @@ public class UsersRepository : IUsersRepository
         this.context = context;
     }
 
-    public async Task<UserEntity> FindById(Guid id)
-    {
-        var user = await context.Users
-            .Include(x => x.Group)
-            .Include(x => x.State)
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (user == null) return null;
-
-        return Clone(user);
-    }
-    
     public async Task<UserEntity> FindByLogin(string login)
     {
         var user = await context.Users

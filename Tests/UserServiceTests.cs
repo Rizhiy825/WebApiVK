@@ -3,6 +3,7 @@ using FluentAssertions;
 using WebApiVK.Authorization;
 using WebApiVK.Domain;
 using WebApiVK.Interfaces;
+using WebApiVK.Models;
 
 namespace Tests;
 

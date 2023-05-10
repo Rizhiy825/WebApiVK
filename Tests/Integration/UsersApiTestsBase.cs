@@ -1,14 +1,13 @@
 ﻿using FluentAssertions;
-using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Web;
 
-namespace Tests.Old;
+namespace Tests.Integration;
 
 public abstract class UsersApiTestsBase
 {
-    protected readonly HttpClient httpClient = new HttpClient();
+    protected readonly HttpClient httpClient = new ();
 
     protected Uri BuildUsersUri()
     {
@@ -71,6 +70,27 @@ public abstract class UsersApiTestsBase
         response.ShouldHaveHeader("Content-Type", "application/json; charset=utf-8");
         response.ReadContentAsJsonObj().ShouldHaveJsonContentEquivalentTo(expectedUser);
     }
+    protected async Task<string> CreateUser(string login, string password)
+    {
+        var request = PrepareHttpRequestMessage();
+
+        var convertedLogin = ConvertToBase64(login);
+        var convertedPassword = ConvertToBase64(password);
+
+        request.Content = new
+        {
+            login = convertedLogin,
+            password = convertedPassword
+        }.SerializeToJsonContent();
+
+        RegisterAuthHeader(request.Headers, "admin", "admin");
+
+        var response = await httpClient.SendAsync(request);
+
+        response.StatusCode.Should().NotBe(HttpStatusCode.InternalServerError);
+
+        return login;
+    }
 
     protected void CheckUser(string userId, object expectedUser)
     {
@@ -85,7 +105,7 @@ public abstract class UsersApiTestsBase
         response.ReadContentAsJsonObj().ShouldHaveJsonContentEquivalentTo(expectedUser);
     }
 
-    public HttpRequestMessage PrepareHttpRequestMessage()
+    protected HttpRequestMessage PrepareHttpRequestMessage()
     {
         var request = new HttpRequestMessage();
         request.Method = HttpMethod.Post;
@@ -94,27 +114,10 @@ public abstract class UsersApiTestsBase
         return request;
     }
 
-    protected async Task<string> CreateUser(object user)
+    protected void RegisterAuthHeader(HttpRequestHeaders headers, string userLogin, string userPassword)
     {
-        var request = PrepareHttpRequestMessage();
-        request.Content = user.SerializeToJsonContent();
-
-        var userLogin = "admin";
-        var userPassword = "admin";
-
-        var authLine = $"{userLogin}:{userPassword}";
-        var base64Line = Convert.ToBase64String(
-            System.Text.Encoding.ASCII.GetBytes(authLine));
-
-        request.Headers.Authorization =
+        var base64Line = ConvertToBase64AuthLine(userLogin, userPassword);
+        headers.Authorization =
             new AuthenticationHeaderValue("Basic", base64Line);
-        
-        var response = await httpClient.SendAsync(request);
-
-        response.StatusCode.Should().NotBe(HttpStatusCode.InternalServerError);
-
-        var createdUserLogin = response.ReadContentAsJsonToken().ToString();
-        return createdUserLogin;
     }
-
 }

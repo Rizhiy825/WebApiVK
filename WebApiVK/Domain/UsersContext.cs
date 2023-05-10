@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using WebApiVK.Interfaces;
+using WebApiVK.Models;
 
 namespace WebApiVK.Domain;
 
@@ -16,15 +17,10 @@ public class UsersContext : DbContext
         : base(options)
     {
         this.encryptor = encryptor;
-
-        //Database.EnsureDeleted();
+        
         Database.EnsureCreated(); // гарантируем, что БД создана
-        //Database.Migrate();
-        //if (Users.ToList().Count > 0)
-        //{
-        //    //var user = Users.Include(x => x.Group).ToList();
-        //}
 
+        // Заполняем начальными данными в случае, если БД пустая
         if (!UserGroups.Any())
         {
             UserGroups.AddRange(
@@ -44,10 +40,15 @@ public class UsersContext : DbContext
         if (!Users.Any())
         {
             var encryptedPassword = this.encryptor.EncryptPassword("admin");
-            var adminGroup = UserGroups.Where(x => x.Code == GroupType.Admin).First();
-            var adminState = UserStates.Where(x => x.Code == StateType.Active).First();
-            var admin = new UserEntity("admin", encryptedPassword, adminGroup, adminState);
+            var adminGroup = UserGroups.First(x => x.Code == GroupType.Admin);
+            var activeState = UserStates.First(x => x.Code == StateType.Active);
+            var admin = new UserEntity("admin", encryptedPassword, adminGroup, activeState);
             Users.Add(admin);
+
+            encryptedPassword = this.encryptor.EncryptPassword("qwerty");
+            var userGroup = UserGroups.First(x => x.Code == GroupType.User);
+            var user = new UserEntity("user", encryptedPassword, userGroup, activeState);
+            Users.Add(user);
 
             SaveChanges();
         }
@@ -55,6 +56,7 @@ public class UsersContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Как выяснилось, InMemoryDataBase не поддерживает реализацию уникальных ключей
         modelBuilder.Entity<UserEntity>().HasAlternateKey(u => u.Login);
     }
 }

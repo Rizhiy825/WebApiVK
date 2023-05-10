@@ -1,7 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using WebApiVK.Interfaces;
-using WebApiVK.Models;
 
 namespace WebApiVK.Authorization;
 

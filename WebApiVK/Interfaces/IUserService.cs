@@ -1,5 +1,4 @@
 ﻿using WebApiVK.Authorization;
-using WebApiVK.Models;
 
 namespace WebApiVK.Interfaces;
 

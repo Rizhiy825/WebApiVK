@@ -1,4 +1,4 @@
-﻿namespace Tests.Old;
+﻿namespace Tests.Integration;
 
 public static class Configuration
 {

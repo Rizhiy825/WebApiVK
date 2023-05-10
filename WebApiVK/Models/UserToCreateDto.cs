@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace WebApiVK.Models;
+﻿namespace WebApiVK.Models;
 
 public class UserToCreateDto
 {

@@ -1,12 +1,9 @@
-using System.Net.Http.Headers;
-using Newtonsoft.Json.Linq;
 using FluentAssertions;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using WebApiVK.Domain;
+using WebApiVK.Models;
 
-namespace Tests.Old
+namespace Tests.Integration
 {
     public class CreateUserTests : UsersApiTestsBase
     {
@@ -15,7 +12,7 @@ namespace Tests.Old
         {
             var request = PrepareHttpRequestMessage();
 
-            var userLogin = "commonUser1";
+            var userLogin = DateTime.Now.ToString("MM/dd/yyyy:H/mm/ss");
             var userPassword = "qwerty";
 
             var convertedLogin = ConvertToBase64(userLogin);
@@ -50,16 +47,14 @@ namespace Tests.Old
         public void Code201_WhenAdminCreateNewUser()
         {
             var request = PrepareHttpRequestMessage();
-
-            var userLogin = "primer5";
+            
+            var userLogin = DateTime.Now.ToString("MM/dd/yyyy:H/mm/ss");
             var userPassword = "qwerty";
 
             var convertedLogin = ConvertToBase64(userLogin);
             var convertedPassword = ConvertToBase64(userPassword);
 
-            var base64Line = ConvertToBase64AuthLine("admin", "admin");
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue("Basic", base64Line);
+            RegisterAuthHeader(request.Headers, "admin", "admin");
 
             request.Content = new
             {
@@ -75,17 +70,18 @@ namespace Tests.Old
         [Fact]
         public void Code403_WhenUserHasAlreadyAuthenticated()
         {
-            var request = PrepareHttpRequestMessage();
-
-            var userLogin = "primer";
+            var userLogin = "user";
             var userPassword = "qwerty";
 
-            var convertedLogin = ConvertToBase64(userLogin);
+            var task = CreateUser(userLogin, userPassword);
+            task.Wait();
+
+            var request = PrepareHttpRequestMessage();
+
+            var convertedLogin = ConvertToBase64(DateTime.Now.ToString("MM/dd/yyyy:H/mm/ss"));
             var convertedPassword = ConvertToBase64(userPassword);
 
-            var base64Line = ConvertToBase64AuthLine(userLogin, userPassword);
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue("Basic", base64Line);
+            RegisterAuthHeader(request.Headers, userLogin, userPassword);
 
             request.Content = new
             {

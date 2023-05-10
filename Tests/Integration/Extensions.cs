@@ -1,12 +1,10 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace Tests.Old;
+namespace Tests.Integration;
 
 public static class Extensions
 {
@@ -73,6 +71,15 @@ public static class Extensions
     {
         var actualHeaderValue = response.GetRequiredHeader(headerName);
         actualHeaderValue.Should().BeEquivalentTo(headerValue);
+    }
+
+    public static void ShouldNotHaveHeader(this HttpResponseMessage response, string headerName)
+    {
+        var hasResponseHeader = response.Headers.TryGetValues(headerName, out var _);
+        var hasContentHeader = response.Content.Headers.TryGetValues(headerName, out var _);
+        var hasHeader = hasResponseHeader || hasContentHeader;
+
+        hasHeader.Should().BeFalse();
     }
 
     public static JObject RemoveProperties(this HttpResponseMessage response, params string[] properties)

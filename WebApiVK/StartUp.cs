@@ -24,20 +24,10 @@ public class StartUp
 
     public void ConfigureServices(IServiceCollection services)
     {
-        // Эти две строки подключают контекст БД postgre. Для работы с настоящей БД раскомментируй
-        
-
-        // Это контекст БД для тестов. Это имитация БД, так что для работы с настоящей БД закомментируй
         services.AddDbContext<UsersContext>(options =>
-            //options.UseInMemoryDatabase("Default Base"));
             options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-
-        // TODO можно ли прокинуть зависимость DbContext вместо создания TestRepository?
-        // БД postgre. Для работы с настоящей БД раскомментируй
+        
         services.AddScoped<IUsersRepository, UsersRepository>();
-
-        // БД для тестов. Для работы с настоящей БД закомментируй
-        //services.AddScoped<IUsersRepository, TestRepository>();
 
         services.AddScoped<IEncryptor, EncryptorSha256>();
         services.AddScoped<ICoder, Base64Coder>();
@@ -66,13 +56,11 @@ public class StartUp
             cfg.CreateMap<UserToAuth, UserEntity>();
             cfg.CreateMap<UserToCreateDto, UserEntity>();
             cfg.CreateMap<UserEntity, UserToReturnDto> ();
-            //cfg.CreateMap<PageList<UserEntity> , PageList<UserToReturnDto>>();
         }, new System.Reflection.Assembly[0]);
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        // Configure the HTTP request pipeline.
         if (env.IsDevelopment())
         {
             app.UseSwagger();

@@ -1,6 +1,4 @@
-﻿using WebApiVK.Domain;
-
-namespace WebApiVK.Models;
+﻿namespace WebApiVK.Models;
 
 public class UserToReturnDto
 {

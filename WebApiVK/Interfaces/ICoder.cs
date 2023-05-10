@@ -1,6 +1,4 @@
-﻿using WebApiVK.Models;
-
-namespace WebApiVK.Interfaces;
+﻿namespace WebApiVK.Interfaces;
 
 public interface ICoder
 {

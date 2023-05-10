@@ -1,11 +1,11 @@
 ﻿using System.Net;
-using System.Net.Http.Headers;
 using FluentAssertions;
 using WebApiVK.Domain;
+using WebApiVK.Models;
 
-namespace Tests.Old;
+namespace Tests.Integration;
 
-public class GetUserByIdTests : UsersApiTestsBase
+public class GetUserByLoginTests : UsersApiTestsBase
 {
     [Fact]
     public void Code200_WhenAllIsFine()
@@ -14,13 +14,8 @@ public class GetUserByIdTests : UsersApiTestsBase
         request.Method = HttpMethod.Get;
         request.RequestUri = BuildUsersByLoginUri("admin");
         request.Headers.Add("Accept", "application/json");
-
-        var userLogin = "admin";
-        var userPassword = "admin";
-
-        var base64Line = ConvertToBase64AuthLine(userLogin, userPassword);
-        request.Headers.Authorization =
-            new AuthenticationHeaderValue("Basic", base64Line);
+        
+        RegisterAuthHeader(request.Headers, "admin", "admin");
 
         var response = httpClient.Send(request);
         response.StatusCode.Should().Be(HttpStatusCode.OK);

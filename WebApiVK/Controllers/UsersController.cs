@@ -1,13 +1,8 @@
-﻿using System.Security.Claims;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using WebApiVK.Authorization;
-using WebApiVK.Domain;
 using WebApiVK.Interfaces;
 using WebApiVK.Models;
 
@@ -17,26 +12,21 @@ namespace WebApiVK.Controllers
     [ApiController]
     public class UsersController : Controller
     {
-        private readonly ILogger<UsersController> logger;
         private readonly IUsersRepository repository;
         private readonly IMapper mapper;
         private readonly IEncryptor encryptor;
         private readonly ICoder coder;
-
-        private readonly HashSet<string> loginsInQueue = new HashSet<string>();
-        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        
         private readonly ILoginsManager loginsManager;
         private readonly LinkGenerator linkGenerator;
 
-        public UsersController(ILogger<UsersController> logger, 
-            IUsersRepository repository, 
+        public UsersController(IUsersRepository repository, 
             IMapper mapper,
             IEncryptor encryptor,
             ICoder coder,
             ILoginsManager loginsManager,
             LinkGenerator linkGenerator)
         {
-            this.logger = logger;
             this.repository = repository;
             this.mapper = mapper;
             this.encryptor = encryptor;
@@ -46,7 +36,7 @@ namespace WebApiVK.Controllers
         }
         
         [HttpGet("{login}", Name = nameof(GetUserByLogin))]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UserEntity>> GetUserByLogin([FromRoute] string login)
         {
             var user = await repository.FindByLogin(login);
@@ -60,9 +50,9 @@ namespace WebApiVK.Controllers
             return Ok(userToReturn);
         }
 
-        // Получать пользователей 
+        // Получать пользователей с применением пагинации
         [HttpGet]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UserEntity>> GetUsers([FromQuery] int pageNumber, [FromQuery] int pageSize = 10)
         {
             pageNumber = pageNumber == 0 ? 1 : pageNumber;
@@ -100,9 +90,7 @@ namespace WebApiVK.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> CreateUser([FromBody] UserToCreateDto user)
         {
-            var authUser = User.IsInRole("User");
-
-            if (authUser)
+            if (!User.IsInRole("Admin") && User.Identity.IsAuthenticated)
                 return Forbid();
 
             // Валидация происходит с помощью FluentValidation
@@ -132,6 +120,7 @@ namespace WebApiVK.Controllers
             catch (DbUpdateException)
             {
                 loginsManager.TryRemoveLogin(login);
+                return Conflict();
             }
             
             await Task.Delay(new TimeSpan(0, 0, 0, 5));
@@ -148,6 +137,7 @@ namespace WebApiVK.Controllers
         // Решено не отправлять в ответ данные пользователя (в соответствии с рекомендациями ответов http).
         // Если админ захочет проверить статус - сделает запрос GET
         [HttpDelete("{login}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser([FromRoute] string login)
         {
             if (login.Length < 4 || login.Length > 30)
