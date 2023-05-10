@@ -17,11 +17,11 @@ public class UserService : IUserService
         this.repository = repository;
     }
 
-    public async Task<UserToAuth> AuthenticateAdmin(string username, string password)
+    public async Task<UserToAuth> AuthenticateUser(string username, string password)
     {
         var user = await repository.FindByLogin(username);
 
-        if (user == null || user.Group.Code != GroupType.Admin) return null;
+        if (user == null) return null;
 
         var passwordHash = encryptor.EncryptPassword(password);
 

@@ -16,11 +16,14 @@ public class UsersRepository : IUsersRepository
 
     public async Task<UserEntity> FindById(Guid id)
     {
-        var user = await context.Users.FindAsync(id);
+        var user = await context.Users
+            .Include(x => x.Group)
+            .Include(x => x.State)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         if (user == null) return null;
 
-        return user;
+        return Clone(user);
     }
     
     public async Task<UserEntity> FindByLogin(string login)
@@ -31,46 +34,70 @@ public class UsersRepository : IUsersRepository
             .FirstOrDefaultAsync(x => x.Login == login);
         
         if (user == null) return null;
+        
+        return Clone(user);
+    }
 
-        return user;
+    public async Task<PageList<UserEntity>> GetPage(int pageNumber, int pageSize)
+    {
+        var count = context.Users.Count();
+        var orderedItems = await context.Users
+            .Include(x => x.Group)
+            .Include(x => x.State)
+            .OrderBy(u => u.Login)
+            .ToListAsync();
+
+        var itemsOnPage = orderedItems.Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+
+        var entities = itemsOnPage.Select(u => Clone(u)).ToList();
+
+        return new PageList<UserEntity>(entities, count, pageNumber, pageSize);
     }
 
     public async Task<UserEntity> Insert(UserEntity user)
     {
-        if (user.Group == null)
+        var userToAdd = Clone(user);
+
+        if (userToAdd.Group == null)
         {
-            user.Group = await context.UserGroups
+            userToAdd.Group = await context.UserGroups
                 .FirstAsync(x => x.Code == GroupType.User);
         }
 
-        if (user.State == null)
+        if (userToAdd.State == null)
         {
-            user.State = await context.UserStates
+            userToAdd.State = await context.UserStates
                 .FirstAsync(x => x.Code == StateType.Active);
         }
-        
-        user.Created = recorder.GetCurrentDateTime();
 
-        var entry = await context.AddAsync(user);
-        var addedUser = entry.Entity;
+        userToAdd.Created = recorder.GetCurrentDateTime();
+
+        var entry = await context.AddAsync(userToAdd);
+        var addedUser = Clone(entry.Entity);
 
         await context.SaveChangesAsync();
         return addedUser;
     }
 
-    public async Task<UserEntity> BlockUser(string login)
+    public async Task<UserEntity> BlockUserByLogin(string login)
     {
-        var userForBlocking = await FindByLogin(login);
+        var user = await context.Users
+            .Include(x => x.Group)
+            .Include(x => x.State)
+            .FirstOrDefaultAsync(x => x.Login == login);
 
-        if (userForBlocking == null) return null;
+        if (user == null) return null;
 
         var blockState = await FindUserState(StateType.Blocked);
 
         if (blockState == null)
             throw new ArgumentNullException();
 
-        userForBlocking.State = blockState;
-        return userForBlocking;
+        user.State = blockState;
+        await context.SaveChangesAsync();
+
+        return Clone(user);
     }
 
     private async Task<UserState> FindUserState(StateType type)
@@ -81,18 +108,8 @@ public class UsersRepository : IUsersRepository
         return state;
     }
 
-    //public async Task<Login> AddLoginToQueue(string login)
-    //{
-    //    var newLogin = new Login(login);
-    //    var addedLogin = await context.LoginQueue.AddAsync(newLogin);
-    //    await context.SaveChangesAsync();
-    //    return addedLogin.Entity;
-    //}
-
-    //public async Task<bool> IsLoginInQueue(string login)
-    //{
-    //    var found = await context.LoginQueue.FindAsync(new string [] {login});
-
-    //    return found != null;
-    //}
+    private UserEntity Clone(UserEntity user)
+    {
+        return new UserEntity(user.Id, user.Login, user.Created, user.Group, user.State, user.Password);
+    }
 }

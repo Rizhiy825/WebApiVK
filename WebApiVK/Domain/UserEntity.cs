@@ -11,10 +11,8 @@ public class UserEntity
     public string Login { get; set; }
     public string Password { get; set; }
     public DateTime Created { get; set; }
-
     public int UserGroupId { get; set; }
     public UserGroup Group { get; set; }
-
     public int UserStateId { get; set; }
     public UserState State { get; set; }
 
@@ -40,8 +38,13 @@ public class UserEntity
         Id = id;
         Login = login;
         Created = created;
+
+        if (group != null) UserGroupId = group.Id;
         Group = group;
+
+        if(state != null) UserStateId = state.Id;
         State = state;
+
         Password = password;
     }
 }

@@ -75,10 +75,21 @@ public static class Extensions
         actualHeaderValue.Should().BeEquivalentTo(headerValue);
     }
 
-    public static void ShouldHaveJsonContentEquivalentTo(this HttpResponseMessage response, object expected)
+    public static JObject RemoveProperties(this HttpResponseMessage response, params string[] properties)
     {
-        var content = response.ReadContentAsJsonToken();
-        content.Should().BeEquivalentTo(JToken.FromObject(expected));
+        var content = response.ReadContentAsJsonObj();
+
+        foreach (var property in properties)
+        {
+            content.Remove(property);
+        }
+
+        return content;
+    }
+
+    public static void ShouldHaveJsonContentEquivalentTo(this JObject content, object expected)
+    {
+        content.Should().BeEquivalentTo(JObject.FromObject(expected));
     }
 
 

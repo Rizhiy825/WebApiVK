@@ -9,6 +9,7 @@ using WebApiVK.Authorization;
 using WebApiVK.Domain;
 using WebApiVK.Interfaces;
 using WebApiVK.Models;
+using WebApiVK.Validators;
 
 namespace WebApiVK;
 
@@ -56,12 +57,6 @@ public class StartUp
             // Отвечаем 406 Not Acceptable на запросы неизвестных форматов
             options.ReturnHttpNotAcceptable = true;
         }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserToCreateDtoValidator>()); ;
-
-        //services.AddFluentValidationAutoValidation();
-        //services.AddFluentValidationClientsideAdapters();
-        //services.AddValidatorsFromAssemblyContaining<UserToCreateDtoValidator>();
-        
-        
         
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
@@ -70,6 +65,8 @@ public class StartUp
         {
             cfg.CreateMap<UserToAuth, UserEntity>();
             cfg.CreateMap<UserToCreateDto, UserEntity>();
+            cfg.CreateMap<UserEntity, UserToReturnDto> ();
+            //cfg.CreateMap<PageList<UserEntity> , PageList<UserToReturnDto>>();
         }, new System.Reflection.Assembly[0]);
     }
 

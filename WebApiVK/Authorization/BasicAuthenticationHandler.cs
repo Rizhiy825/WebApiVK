@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
+using WebApiVK.Domain;
 
 namespace WebApiVK.Authorization;
 
@@ -45,7 +46,7 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
         var credentials = coder.DecodeCredentials(authHeader.Parameter);
         var username = credentials.Item1;
         var password = credentials.Item2;
-        user = await userService.AuthenticateAdmin(username, password);
+        user = await userService.AuthenticateUser(username, password);
 
         if (user == null)
         {
@@ -56,9 +57,9 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
         // В случае прохождения аутентификации выдаем Claim
         var claims = new[]
         {
+            new Claim(ClaimTypes.Role, user.Group.Code.ToString()),
             new Claim("Id", user.Id.ToString()),
-            new Claim("Login", user.Login),
-            new Claim(ClaimTypes.Role, "admin")
+            new Claim("Login", user.Login)
         };
 
         var identity = new ClaimsIdentity(claims, Scheme.Name);

@@ -2,7 +2,7 @@
 using WebApiVK.Interfaces;
 using WebApiVK.Models;
 
-namespace WebApiVK.Domain;
+namespace WebApiVK.Validators;
 
 public class UserToCreateDtoValidator : AbstractValidator<UserToCreateDto>
 {
@@ -10,7 +10,7 @@ public class UserToCreateDtoValidator : AbstractValidator<UserToCreateDto>
 
     public UserToCreateDtoValidator(ICoder coder)
     {
-        this.coder = coder; 
+        this.coder = coder;
 
         RuleFor(x => x.Login)
             .NotEmpty().WithMessage("Login is required.")

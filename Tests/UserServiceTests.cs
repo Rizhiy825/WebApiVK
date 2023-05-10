@@ -29,7 +29,7 @@ public class UserServiceTests
         A.CallTo(() => encryptor.EncryptPassword(password))
             .Returns(password);
 
-        var authUser = await service.AuthenticateAdmin(login, password);
+        var authUser = await service.AuthenticateUser(login, password);
 
         authUser.Should().BeNull();
     }
@@ -56,7 +56,7 @@ public class UserServiceTests
         A.CallTo(() => encryptor.EncryptPassword(password))
             .Returns(wrongPassword);
 
-        var authUser = await service.AuthenticateAdmin(login, password);
+        var authUser = await service.AuthenticateUser(login, password);
 
         authUser.Should().BeNull();
     }
@@ -82,7 +82,7 @@ public class UserServiceTests
         A.CallTo(() => encryptor.EncryptPassword(password))
             .Returns(password);
 
-        var authUser = await service.AuthenticateAdmin(login, password);
+        var authUser = await service.AuthenticateUser(login, password);
 
         authUser.Should()
             .BeEquivalentTo(new UserToAuth(
