@@ -4,7 +4,7 @@ using WebApiVK.Interfaces;
 
 namespace WebApiVK.Domain;
 
-public class UsersContext : DbContext, IContext
+public class UsersContext : DbContext
 {
     public DbSet<UserEntity> Users { get; set; } = null!;
     public DbSet<UserGroup> UserGroups { get; set; } = null!;
@@ -16,11 +16,14 @@ public class UsersContext : DbContext, IContext
         : base(options)
     {
         this.encryptor = encryptor;
+
         //Database.EnsureDeleted();
         Database.EnsureCreated(); // гарантируем, что БД создана
-
-        // Удаляем всех пользователей 
-        Users.RemoveRange(Users.ToList()); 
+        //Database.Migrate();
+        //if (Users.ToList().Count > 0)
+        //{
+        //    //var user = Users.Include(x => x.Group).ToList();
+        //}
 
         if (!UserGroups.Any())
         {

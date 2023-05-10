@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using WebApiVK.Attributes;
+using Microsoft.EntityFrameworkCore;
 using WebApiVK.Authorization;
 using WebApiVK.Domain;
 using WebApiVK.Interfaces;
@@ -20,18 +20,23 @@ namespace WebApiVK.Controllers
         private readonly IEncryptor encryptor;
         private readonly ICoder coder;
 
+        private readonly HashSet<string> loginsInQueue = new HashSet<string>();
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        private readonly ILoginsManager loginsManager;
 
         public UsersController(ILogger<UsersController> logger, 
             IUsersRepository repository, 
             IMapper mapper,
             IEncryptor encryptor,
-            ICoder coder)
+            ICoder coder,
+            ILoginsManager loginsManager)
         {
             this.logger = logger;
             this.repository = repository;
             this.mapper = mapper;
             this.encryptor = encryptor;
             this.coder = coder;
+            this.loginsManager = loginsManager;
         }
         
         [HttpGet("{userId}", Name = nameof(GetUserById))]
@@ -52,24 +57,41 @@ namespace WebApiVK.Controllers
             
             return Ok();
         }
-
+        
         // Допускаем к созданию либо админа, либо неаутентифицированного пользователя
         [HttpPost]
-        [AllowAnonymousOrAdmin]
-        public IActionResult CreateUser([FromBody] UserToCreateDto user)
+        [AllowAnonymous]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult> CreateUser([FromBody] UserToCreateDto user)
         {
             // Валидация происходит с помощью FluentValidation
             var login = coder.Decode(user.Login);
+
+            // Два потока могут одновременно зайти в IsLoginInQueue и пройти проверку,
+            // но TryAddLoginToQueue точно отсеит один из потоков
+            if (loginsManager.IsLoginInQueue(login) ||
+                !loginsManager.TryAddLoginToQueue(login))
+            {
+                return Conflict();
+            }
+
             var password = coder.Decode(user.Password);
-
             var encrypted = encryptor.EncryptPassword(password);
+
             var newUser = new UserToCreateDto(login, encrypted);
-
             var userEntity = mapper.Map<UserEntity>(newUser);
-            var addedUser = repository.Insert(userEntity);
+            
+            // Тут уже не переживаем, что в репо добавляется пользователь с таким же логином
+            var addedUser = await repository.Insert(userEntity);
+            
+            await Task.Delay(new TimeSpan(0, 0, 0, 5));
 
-            var response = CreatedAtRoute(nameof(GetUserById), new { login = addedUser.Login }, addedUser.Login);
-            return Ok();
+            // Проверку выполнять необязательно, на этом этапе не может быть два потока,
+            // которые одновременно пытаются удалить один логин из очереди. 
+            loginsManager.TryRemoveLogin(login);
+
+            var response = CreatedAtRoute(nameof(GetUserById), new { userId = addedUser.Id }, addedUser.Id);
+            return response;
         }
     }
 }

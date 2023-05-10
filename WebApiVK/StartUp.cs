@@ -1,7 +1,9 @@
 ﻿using System.Net;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using WebApiVK.Authorization;
 using WebApiVK.Domain;
@@ -22,23 +24,25 @@ public class StartUp
     public void ConfigureServices(IServiceCollection services)
     {
         // Эти две строки подключают контекст БД postgre. Для работы с настоящей БД раскомментируй
-        //services.AddDbContext<UsersContext>(options =>
-        //    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+        
 
         // Это контекст БД для тестов. Это имитация БД, так что для работы с настоящей БД закомментируй
-        services.AddDbContext<TestContext>(options =>
-              options.UseInMemoryDatabase("Default Base"));
+        services.AddDbContext<UsersContext>(options =>
+            //options.UseInMemoryDatabase("Default Base"));
+            options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
         // TODO можно ли прокинуть зависимость DbContext вместо создания TestRepository?
         // БД postgre. Для работы с настоящей БД раскомментируй
-        //services.AddScoped<IUsersRepository, NpgsqlUsersRepository>();
+        services.AddScoped<IUsersRepository, UsersRepository>();
 
         // БД для тестов. Для работы с настоящей БД закомментируй
-        services.AddScoped<IUsersRepository, TestRepository>();
+        //services.AddScoped<IUsersRepository, TestRepository>();
 
         services.AddScoped<IEncryptor, EncryptorSha256>();
         services.AddScoped<ICoder, Base64Coder>();
         services.AddScoped<IUserService, UserService>();
+        services.AddSingleton<IDateTimeRecorder, DateTimeRecorder>();
+        services.AddSingleton<ILoginsManager, LoginQueueManager>();
 
         // Внедрение реализации Basic-авторизации
         services.AddAuthentication("BasicAuthentication").
@@ -51,8 +55,14 @@ public class StartUp
         {
             // Отвечаем 406 Not Acceptable на запросы неизвестных форматов
             options.ReturnHttpNotAcceptable = true;
-        }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserToCreateDtoValidator>());
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserToCreateDtoValidator>()); ;
+
+        //services.AddFluentValidationAutoValidation();
+        //services.AddFluentValidationClientsideAdapters();
+        //services.AddValidatorsFromAssemblyContaining<UserToCreateDtoValidator>();
+        
+        
+        
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
@@ -77,7 +87,7 @@ public class StartUp
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
-
+        
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();

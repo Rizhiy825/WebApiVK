@@ -5,5 +5,5 @@ namespace WebApiVK.Interfaces;
 
 public interface IUserService
 {
-    Task<UserToAuth> Authenticate(string username, string password);
+    Task<UserToAuth> AuthenticateAdmin(string username, string password);
 }

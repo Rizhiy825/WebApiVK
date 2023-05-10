@@ -32,7 +32,6 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
     {
         this.userService = userService;
         this.coder = coder;
-        //this.events = events;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -46,7 +45,7 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
         var credentials = coder.DecodeCredentials(authHeader.Parameter);
         var username = credentials.Item1;
         var password = credentials.Item2;
-        user = await userService.Authenticate(username, password);
+        user = await userService.AuthenticateAdmin(username, password);
 
         if (user == null)
         {
@@ -67,24 +66,5 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
         var ticket = new AuthenticationTicket(principal, Scheme.Name);
         return AuthenticateResult.Success(ticket);
-    }
-
-    //protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
-    //{
-    //    var result = new { message = "Неверный логин или пароль" };
-    //    await Response.WriteAsync(JsonConvert.SerializeObject(result));
-    //    await base.HandleChallengeAsync(properties);
-    //}
-
-    // TODO сделай фильтрацию NoResult
-    protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
-    {
-        
-
-        Response.StatusCode = 403;
-        var result = new { message = "Invalid username or password" };
-        
-        await Response.WriteAsync(JsonConvert.SerializeObject(result));
-        await Task.CompletedTask;
     }
 }

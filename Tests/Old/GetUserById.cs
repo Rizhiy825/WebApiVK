@@ -1,18 +1,18 @@
-﻿using FluentAssertions;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
+using FluentAssertions;
 
-namespace Tests;
+namespace Tests.Old;
 
-public class GetUsers : UsersApiTestsBase
+public class GetUserById : UsersApiTestsBase
 {
     [Fact]
-    public void Code200_WhenSecondPage()
+    public void Code201_WhenAllIsFine()
     {
         var request = new HttpRequestMessage();
         request.Method = HttpMethod.Get;
-        request.RequestUri = BuildUsersWithPagesUri(2, 10);
-        request.Headers.Add("Accept", "*/*");
+        request.RequestUri = BuildUsersByIdUri("77777777-7777-7777-7777-777777777777");
+        request.Headers.Add("Accept", "application/json");
 
         var userLogin = "admin";
         var userPassword = "admin";
@@ -25,7 +25,6 @@ public class GetUsers : UsersApiTestsBase
             new AuthenticationHeaderValue("Basic", base64Line);
 
         var response = httpClient.Send(request);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
