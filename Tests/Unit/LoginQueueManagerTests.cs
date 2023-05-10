@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using WebApiVK.Domain;
 
-namespace Tests;
+namespace Tests.Unit;
 
 public class LoginQueueManagerTests
 {
@@ -27,7 +27,7 @@ public class LoginQueueManagerTests
 
         first.Start();
         second.Start();
-        
+
         first.Join();
         second.Join();
 
@@ -62,7 +62,7 @@ public class LoginQueueManagerTests
     {
         var manager = new LoginQueueManager();
         var login = "testLogin";
-        
+
         var isRemoved = manager.TryRemoveLogin(login);
 
         isRemoved.Should().BeFalse();

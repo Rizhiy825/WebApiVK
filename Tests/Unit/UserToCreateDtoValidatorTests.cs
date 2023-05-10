@@ -4,11 +4,11 @@ using WebApiVK.Authorization;
 using WebApiVK.Models;
 using WebApiVK.Validators;
 
-namespace Tests;
+namespace Tests.Unit;
 
 public class UserToCreateDtoValidatorTests
 {
-    private Base64Coder coder = new ();
+    private Base64Coder coder = new();
 
     [Theory]
     [InlineData("low", "normal", "Login", "Login must be between 4 and 30 characters.")]
@@ -19,9 +19,9 @@ public class UserToCreateDtoValidatorTests
     [InlineData("normal", "", "Password", "Password is required.")]
     [InlineData("login with spaces", "normal", "Login", "Login must be without space characters.")]
     [InlineData("normal", "pass with spaces", "Password", "Password must be without space characters.")]
-    public void WhenCredentialsNotValid_ShouldReturnErrorWithMessage(string login, 
-        string password, 
-        string propName, 
+    public void WhenCredentialsNotValid_ShouldReturnErrorWithMessage(string login,
+        string password,
+        string propName,
         string errorMessage)
     {
         var validator = new UserToCreateDtoValidator(new Base64Coder());
@@ -30,7 +30,7 @@ public class UserToCreateDtoValidatorTests
 
         result.Errors
             .Should()
-            .Contain(r => r.PropertyName == propName && 
+            .Contain(r => r.PropertyName == propName &&
                           r.ErrorMessage == errorMessage);
     }
 

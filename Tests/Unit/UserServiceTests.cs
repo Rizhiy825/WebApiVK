@@ -5,12 +5,12 @@ using WebApiVK.Domain;
 using WebApiVK.Interfaces;
 using WebApiVK.Models;
 
-namespace Tests;
+namespace Tests.Unit;
 
 public class UserServiceTests
 {
     [Fact]
-    public async void AuthUserThatNotAdmin_ShouldReturnNull()
+    public async void AuthUserThatNotAdmin_ShouldReturnUser()
     {
         var encryptor = A.Fake<IEncryptor>();
         var fakeRepo = A.Fake<IUsersRepository>();
@@ -31,8 +31,13 @@ public class UserServiceTests
             .Returns(password);
 
         var authUser = await service.AuthenticateUser(login, password);
-
-        authUser.Should().BeNull();
+        
+        authUser.Should()
+            .BeEquivalentTo(new UserToAuth(
+                authUser.Id,
+                login,
+                new UserGroup(GroupType.User, "Description"),
+                new UserState(StateType.Active, "Active")));
     }
 
     [Fact]
@@ -87,8 +92,9 @@ public class UserServiceTests
 
         authUser.Should()
             .BeEquivalentTo(new UserToAuth(
-                authUser.Id, 
-                login, 
-                new UserGroup(GroupType.Admin, "Description")));
+                authUser.Id,
+                login,
+                new UserGroup(GroupType.Admin, "Description"),
+                new UserState(StateType.Active, "Active")));
     }
 }

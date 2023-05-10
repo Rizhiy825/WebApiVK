@@ -23,7 +23,7 @@ public class UserService : IUserService
 
         if (passwordHash == user.Password)
         {
-            return await Task.FromResult(new UserToAuth(user.Id, username, user.Group));
+            return await Task.FromResult(new UserToAuth(user.Id, username, user.Group, user.State));
         }
         
         return null;

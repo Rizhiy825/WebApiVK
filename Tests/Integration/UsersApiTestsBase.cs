@@ -54,22 +54,6 @@ public abstract class UsersApiTestsBase
         return base64Line;
     }
 
-    protected void CheckUserCreated(string createdUserId, string createdUserUri, object expectedUser)
-    {
-        // Проверка, что идентификатор созданного пользователя возвращается в теле ответа
-        CheckUser(createdUserId, expectedUser);
-
-        // Проверка, что ссылка на созданного пользователя возвращается в заголовке Location
-        var request = new HttpRequestMessage();
-        request.Method = HttpMethod.Get;
-        request.RequestUri = new Uri(createdUserUri);
-        request.Headers.Add("Accept", "application/json");
-        var response = httpClient.Send(request);
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.ShouldHaveHeader("Content-Type", "application/json; charset=utf-8");
-        response.ReadContentAsJsonObj().ShouldHaveJsonContentEquivalentTo(expectedUser);
-    }
     protected async Task<string> CreateUser(string login, string password)
     {
         var request = PrepareHttpRequestMessage();
@@ -91,20 +75,7 @@ public abstract class UsersApiTestsBase
 
         return login;
     }
-
-    protected void CheckUser(string userId, object expectedUser)
-    {
-        var request = new HttpRequestMessage();
-        request.Method = HttpMethod.Get;
-        request.RequestUri = BuildUsersByLoginUri(userId);
-        request.Headers.Add("Accept", "application/json");
-        var response = httpClient.Send(request);
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.ShouldHaveHeader("Content-Type", "application/json; charset=utf-8");
-        response.ReadContentAsJsonObj().ShouldHaveJsonContentEquivalentTo(expectedUser);
-    }
-
+    
     protected HttpRequestMessage PrepareHttpRequestMessage()
     {
         var request = new HttpRequestMessage();

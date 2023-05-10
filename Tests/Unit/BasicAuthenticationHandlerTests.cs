@@ -10,7 +10,7 @@ using WebApiVK.Interfaces;
 using WebApiVK.Domain;
 using WebApiVK.Models;
 
-namespace Tests;
+namespace Tests.Unit;
 
 public class BasicAuthenticationHandlerTests
 {
@@ -63,9 +63,9 @@ public class BasicAuthenticationHandlerTests
 
         A.CallTo(() => userServiceMock.AuthenticateUser(username, password))
             .Returns(Task.FromResult<UserToAuth>(null));
-        
+
         var result = await handler.HandleAuthenticateAsync();
-        
+
         result.Failure.Should().NotBeNull();
         result.Failure.Message.Should().Be("Invalid username or password");
     }
@@ -81,15 +81,16 @@ public class BasicAuthenticationHandlerTests
             context);
 
         var (username, password) = ("test", "test");
-        var userToAuth = new UserToAuth(new Guid(), username, new UserGroup(GroupType.Admin, "desctiption"));
-        
+        var userToAuth = new UserToAuth(new Guid(),
+            username,
+            new UserGroup(GroupType.Admin, "desctiption"),
+            new UserState(StateType.Active, "active"));
+
         A.CallTo(() => userServiceMock.AuthenticateUser(username, password))
             .Returns(Task.FromResult(userToAuth));
 
-        // Act
         var result = await handler.HandleAuthenticateAsync();
 
-        // Assert
         Assert.True(result.Succeeded);
     }
 }

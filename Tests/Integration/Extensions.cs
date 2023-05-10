@@ -98,6 +98,4 @@ public static class Extensions
     {
         content.Should().BeEquivalentTo(JObject.FromObject(expected));
     }
-
-
 }

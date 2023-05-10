@@ -2,7 +2,7 @@
 using WebApiVK.Authorization;
 using WebApiVK.Interfaces;
 
-namespace Tests;
+namespace Tests.Unit;
 
 public class EncryptorSha256Tests
 {
@@ -17,10 +17,10 @@ public class EncryptorSha256Tests
     public void SamePassword_ShouldReturnSameHash()
     {
         var password = "TestPassword";
-        
+
         var hash1 = encryptor.EncryptPassword(password);
         var hash2 = encryptor.EncryptPassword(password);
-        
+
         hash1.Should().Be(hash2);
     }
 
@@ -29,10 +29,10 @@ public class EncryptorSha256Tests
     {
         var password1 = "TestPassword1";
         var password2 = "TestPassword2";
-        
+
         var hash1 = encryptor.EncryptPassword(password1);
         var hash2 = encryptor.EncryptPassword(password2);
-        
+
         hash1.Should().NotBe(hash2);
     }
 }

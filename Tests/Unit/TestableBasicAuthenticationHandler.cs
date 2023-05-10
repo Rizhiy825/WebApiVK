@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using WebApiVK.Authorization;
 using WebApiVK.Interfaces;
 
-namespace Tests;
+namespace Tests.Unit;
 
 public class TestableBasicAuthenticationHandler : BasicAuthenticationHandler
 {
@@ -20,6 +20,6 @@ public class TestableBasicAuthenticationHandler : BasicAuthenticationHandler
     {
     }
 
-    public new async Task<AuthenticateResult> HandleAuthenticateAsync() => 
+    public new async Task<AuthenticateResult> HandleAuthenticateAsync() =>
         await base.HandleAuthenticateAsync();
 }

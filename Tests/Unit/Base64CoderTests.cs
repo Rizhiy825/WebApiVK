@@ -1,12 +1,12 @@
 ﻿using FluentAssertions;
 using WebApiVK.Authorization;
 
-namespace Tests;
+namespace Tests.Unit;
 
 public class Base64CoderTests
 {
-    private Base64Coder coder = new ();
-    
+    private Base64Coder coder = new();
+
     [Theory]
     [InlineData("admin", "admin", "YWRtaW46YWRtaW4=")]
     [InlineData("symbols_+-/", "--=Sym=--", "c3ltYm9sc18rLS86LS09U3ltPS0t")]
